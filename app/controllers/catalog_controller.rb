@@ -1,7 +1,9 @@
 # frozen_string_literal: true
-class <%= controller_name.classify %>Controller < ApplicationController
+class CatalogController < ApplicationController
 
   include Blacklight::Catalog
+  include Blacklight::Marc::Catalog
+
 
   configure_blacklight do |config|
     ## Class for sending and receiving requests from a search index
@@ -20,10 +22,20 @@ class <%= controller_name.classify %>Controller < ApplicationController
 
     # solr path which will be added to solr base url before the other solr params.
     #config.solr_path = 'select'
-    #config.document_solr_path = 'get'
 
     # items to show per page, each number in the array represent another option to choose from.
     #config.per_page = [10,20,50,100]
+
+    ## Default parameters to send on single-document requests to Solr. These settings are the Blackligt defaults (see SearchHelper#solr_doc_params) or
+    ## parameters included in the Blacklight-jetty document requestHandler.
+    #
+    #config.default_document_solr_params = {
+    #  qt: 'document',
+    #  ## These are hard-coded in the blacklight 'document' requestHandler
+    #  # fl: '*',
+    #  # rows: 1,
+    #  # q: '{!term f=id v=$id}'
+    #}
 
     # solr field configuration for search results/index views
     config.index.title_field = 'title_display'
@@ -67,14 +79,21 @@ class <%= controller_name.classify %>Controller < ApplicationController
     config.add_facet_field 'subject_geo_facet', label: 'Region'
     config.add_facet_field 'subject_era_facet', label: 'Era'
 
-    config.add_facet_field 'example_pivot_field', label: 'Pivot Field', :pivot => ['format', 'language_facet']
+    config.add_facet_field 'oa_classification_facet', label: 'Open Access Classificaiton'
+    config.add_facet_field 'affiliations_facet', label: 'Affiliation'
+    config.add_facet_field 'domains_facet', label: 'Sources Domains'
+    config.add_facet_field 'publisher_facet', label: 'Publisher'
+    config.add_facet_field 'author_facet', label: 'Authors'
+    config.add_facet_field 'container_title_facet', label: 'Container'
+    config.add_facet_field 'funders_facet', label: 'Funders'
 
-    config.add_facet_field 'example_query_facet_field', label: 'Publish Date', :query => {
-       :years_5 => { label: 'within 5 Years', fq: "pub_date:[#{Time.zone.now.year - 5 } TO *]" },
-       :years_10 => { label: 'within 10 Years', fq: "pub_date:[#{Time.zone.now.year - 10 } TO *]" },
-       :years_25 => { label: 'within 25 Years', fq: "pub_date:[#{Time.zone.now.year - 25 } TO *]" }
-    }
+    #config.add_facet_field 'example_pivot_field', label: 'Pivot Field', :pivot => ['format', 'language_facet']
 
+    #config.add_facet_field 'example_query_facet_field', label: 'Publish Date', :query => {
+    #   :years_5 => { label: 'within 5 Years', fq: "pub_date:[#{Time.zone.now.year - 5 } TO *]" },
+    #   :years_10 => { label: 'within 10 Years', fq: "pub_date:[#{Time.zone.now.year - 10 } TO *]" },
+    #   :years_25 => { label: 'within 25 Years', fq: "pub_date:[#{Time.zone.now.year - 25 } TO *]" }
+    #}
 
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
@@ -92,6 +111,8 @@ class <%= controller_name.classify %>Controller < ApplicationController
     config.add_index_field 'published_display', label: 'Published'
     config.add_index_field 'published_vern_display', label: 'Published'
     config.add_index_field 'lc_callnum_display', label: 'Call number'
+    config.add_index_field 'funders_display', label: 'Funders'
+    config.add_index_field 'container_title_display', label: 'Container'
 
     # solr fields to be displayed in the show (single result) view
     #   The ordering of the field names is the order of the display
@@ -109,6 +130,8 @@ class <%= controller_name.classify %>Controller < ApplicationController
     config.add_show_field 'published_vern_display', label: 'Published'
     config.add_show_field 'lc_callnum_display', label: 'Call number'
     config.add_show_field 'isbn_t', label: 'ISBN'
+    config.add_show_field 'funders_display', label: 'Funders'
+    config.add_show_field 'container_title_display', label: 'Container'
 
     # "fielded" search configuration. Used by pulldown among other places.
     # For supported keys in hash, see rdoc for Blacklight::SearchFields
