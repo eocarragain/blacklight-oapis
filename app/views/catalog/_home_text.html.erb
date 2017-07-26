@@ -1,0 +1,34 @@
+<div class="page-header row">
+  <h2 class="col-md-8 page-heading"><%= t('blacklight.welcome') %></h2>
+</div>
+<div id="getting-started">
+
+  <h3 class='section-heading'>Irish Research Publications</h3>
+  <div id="tester" style="width:600px;height:250px;"></div>
+<script>
+<% colours = {'unknown': '#000000', 'gold': '#FFD700', 'green': '#00f64f'} %>
+<% @document_list[0].response["facet_counts"]["facet_fields"]["oa_classification_facet"].each_slice(2) do | oa_class | %>
+var <%= "trace_#{oa_class[0]}" %> = {
+  x: [<%= oa_class[1] %>,],
+  y: ['Availability',],
+  name: '<%= oa_class[0] %>',
+  orientation: 'h',
+  marker: {
+    color: '<%= oa_class[0] %>',
+    width: 1
+  },
+  type: 'bar'
+};
+<% end %>
+
+
+var data = [trace_unknown, trace_green, trace_gold];
+
+var layout = {
+  title: 'Open Access Availability',
+  barmode: 'stack'
+};
+
+Plotly.newPlot('tester', data, layout);
+
+</script>

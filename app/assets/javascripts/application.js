@@ -17,4 +17,6 @@
 //= require jquery
 //= require blacklight/blacklight
 
+//= require plotly
+
 //= require_tree .
